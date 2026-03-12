@@ -10,16 +10,29 @@ export default async function handler(req, res) {
     }
 
     try {
+        // Intercept Grok requests and build a dynamic failover routing array
+        let requestBody = { ...req.body };
+        if (requestBody.model && requestBody.model.startsWith("x-ai/grok")) {
+            // Delete the strict model key
+            delete requestBody.model;
+            // Add OpenRouter's fallback routing array
+            requestBody.models = [
+                "x-ai/grok-3",
+                "x-ai/grok-2-1212",
+                "x-ai/grok-2-vision"
+            ];
+        }
+
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${apiKey}`,
                 "Content-Type": "application/json",
                 // OpenRouter required site verification headers
-                "HTTP-Referer": "https://promptchan.studio",
-                "X-OpenRouter-Title": "PromptChan Pro Elite"
+                "HTTP-Referer": "https://supergod.studio",
+                "X-OpenRouter-Title": "Supergod Studio"
             },
-            body: JSON.stringify(req.body)
+            body: JSON.stringify(requestBody)
         });
 
         const data = await response.json();
