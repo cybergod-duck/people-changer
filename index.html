@@ -365,7 +365,8 @@
                 restore_faces: true
             };
 
-            const target = "https://prod.aicloudnetservices.com/api/external/create";
+            // Redirecting through Vercel Serverless to bypass CORS headers
+            const target = "/api/promptchan";
 
             try {
                 stage.innerText = "Decrypting Response...";
