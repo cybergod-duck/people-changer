@@ -316,7 +316,7 @@
                         messages: [
                             {
                                 role: "system",
-                                content: `You are an Elite NSFW Prompt Engineer. Your job is to create the perfect prompt based on the user's physical description requests AND the stylistic photo provided across iterative turns. Output ONLY valid JSON matching this exact schema. Note: detail is an integer (-2 to 2). Sliders (weight, breast, ass) are floats (e.g. 0.0). Age, seed, creativity are integers.
+                                content: `You are an Elite NSFW Prompt Engineer. Your job is to create the perfect prompt based on the user's physical description requests AND the stylistic photo provided across iterative turns. YOU MUST OUTPUT A VALID JSON OBJECT AND NOTHING ELSE. DO NOT OUTPUT RAW TEXT. Output exactly this JSON schema. Note: detail is an integer (-2 to 2). Sliders (weight, breast, ass) are floats (e.g. 0.0). Age, seed, creativity are integers.
 {
   "style": "Cinematic",
   "poses": "Default",
