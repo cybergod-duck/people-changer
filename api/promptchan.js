@@ -4,10 +4,16 @@ export default async function handler(req, res) {
     }
 
     try {
+        const apiKey = req.headers['x-api-key'];
+        
+        if (!apiKey) {
+             return res.status(401).json({ error: 'x-api-key header missing' });
+        }
+
         const response = await fetch("https://prod.aicloudnetservices.com/api/external/create", {
             method: "POST",
             headers: {
-                "x-api-key": req.headers['x-api-key'], // Passing the PromptChan key from the client
+                "x-api-key": apiKey,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(req.body)
