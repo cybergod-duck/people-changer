@@ -747,14 +747,6 @@
                     <input id="pc-key" type="password" placeholder="Enter PromptChan Key"
                         class="w-full bg-black border border-white/10 rounded-xl p-3 text-xs mono text-green-500 focus:border-green-500 outline-none">
                 </div>
-                <div class="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[9px] mono uppercase text-zinc-400">Stable Proxy (ThingProxy)</span>
-                        <input type="checkbox" id="use-proxy" checked class="accent-green-500">
-                    </div>
-                    <p class="text-[8px] text-zinc-600 leading-relaxed uppercase mono">Bypasses PromptChan CORS security
-                        walls.</p>
-                </div>
             </div>
             <button onclick="toggleSettings()"
                 class="w-full mt-10 bg-white text-black font-black py-4 rounded-2xl text-[10px] mono uppercase tracking-widest hover:bg-zinc-200 transition-all">Initialize
@@ -871,13 +863,11 @@
                 restore_faces: true
             };
 
-            // BYPASS LOGIC: ThingProxy is a much more robust "Elite" proxy
             const target = "https://prod.aicloudnetservices.com/api/external/create";
-            const finalUrl = useProxy ? `https://thingproxy.freeboard.io/fetch/${target}` : target;
 
             try {
                 stage.innerText = "Decrypting Response...";
-                const res = await fetch(finalUrl, {
+                const res = await fetch(target, {
                     method: "POST",
                     headers: {
                         "x-api-key": document.getElementById('pc-key').value,
@@ -903,9 +893,6 @@
             } catch (e) {
                 addMsg('assistant', `PromptChan Link Failed: ${e.message}`);
                 stage.innerText = "Link Interrupted";
-                if (useProxy && e.message.includes("fetch")) {
-                    addMsg('assistant', "Try disabling 'Stable Proxy' - the proxy service might be down.");
-                }
             } finally {
                 setTimeout(() => {
                     loader.classList.add('hidden');
