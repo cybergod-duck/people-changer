@@ -236,12 +236,14 @@
         let currentPayload = {};
         let history = [];
 
-        async function handleChat() {
+        async function handleChat(isSilent = false) {
             const input = document.getElementById('chat-input');
             const msg = input.value.trim();
             if (!msg) return;
 
-            addMsg('user', msg);
+            if (!isSilent) {
+                addMsg('user', msg);
+            }
             input.value = '';
             input.style.height = 'auto';
             setStatus('Grok Engineering...');
@@ -486,7 +488,7 @@ SCHEMA 2 (Ready to Render - Generate Payload):
             // Auto trigger Grok vision analysis instead of static text
             const input = document.getElementById('chat-input');
             input.value = "Here is my Visual DNA photo. What do you think of this? Describe what you see and tell me your thoughts.";
-            await handleChat();
+            await handleChat(true);
         }
         function clearCanvas() {
             document.getElementById('main-image').classList.add('hidden');
