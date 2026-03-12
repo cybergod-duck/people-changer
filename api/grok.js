@@ -19,7 +19,7 @@ export default async function handler(req, res) {
             requestBody.models = [
                 "x-ai/grok-3",
                 "x-ai/grok-3-mini",
-                "x-ai/grok-2",
+                "x-ai/grok-2-1212",
                 "x-ai/grok-2-vision"
             ];
         }
