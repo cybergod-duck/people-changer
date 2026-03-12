@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptChan Pro Studio | Elite</title>
+    <title>Supergod Studio | Core</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap"
@@ -69,7 +69,7 @@
                 <div class="absolute inset-0 w-3 h-3 rounded-full bg-green-400 animate-ping opacity-20"></div>
             </div>
             <h1 class="text-xs font-black tracking-[0.3em] uppercase mono text-white/90">
-                PromptChan <span class="text-green-500">Elite</span> Node
+                Supergod <span class="text-green-500">Studio</span> Core
             </h1>
         </div>
         <div class="flex items-center gap-6">
@@ -94,34 +94,7 @@
 
         <!-- LEFT: PARAMETERS -->
         <aside class="w-80 bg-zinc-950/50 border-r border-white/5 p-6 flex flex-col gap-8">
-            <section>
-                <div class="flex items-center justify-between mb-4">
-                    <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold">Style Profile</label>
-                    <span class="text-[9px] text-green-500 mono">XL+ ACTIVE</span>
-                </div>
-                <select id="style-select"
-                    class="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-green-500 outline-none transition-all">
-                    <option value="Cinematic">Cinematic</option>
-                    <option value="Anime">Anime</option>
-                    <option value="Hyperreal">Hyperreal</option>
-                    <option value="Hyperanime">Hyperanime</option>
-                    <option value="K-Pop">K-Pop</option>
-                    <option value="Fur">Fur</option>
-                    <option value="Furtoon">Furtoon</option>
-                    <option value="Render XL+">Render XL+</option>
-                    <option value="Illustration XL+">Illustration XL+</option>
-                    <option value="Anime XL">Anime XL</option>
-                    <option value="Anime XL+">Anime XL+</option>
-                    <option value="Hardcore XL">Hardcore XL</option>
-                    <option value="Cinematic XL">Cinematic XL</option>
-                    <option value="Photo XL+">Photo XL+</option>
-                    <option value="Hyperreal XL+">Hyperreal XL+</option>
-                    <option value="Hyperreal XL+ v2">Hyperreal XL+ v2</option>
-                    <option value="Photo XL+ v2">Photo XL+ v2</option>
-                </select>
-            </section>
-
-            <section>
+            <section class="mt-auto">
                 <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold mb-4 block">Visual DNA
                     (Ref)</label>
                 <div id="dropzone"
@@ -143,22 +116,6 @@
                     DNA</button>
             </section>
 
-            <section class="mt-auto space-y-4">
-                <div class="p-4 bg-zinc-900/50 border border-white/5 rounded-2xl">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[9px] mono text-zinc-500 uppercase">Live Output Feed</span>
-                        <div id="feed-status" class="w-1.5 h-1.5 rounded-full bg-zinc-800"></div>
-                    </div>
-                    <div id="live-prompt-view"
-                        class="h-20 text-[9px] mono text-zinc-600 overflow-hidden line-clamp-4 leading-relaxed italic">
-                        Awaiting data stream from Grok...
-                    </div>
-                </div>
-                <button onclick="triggerGeneration()" id="generate-btn"
-                    class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-5 rounded-2xl shadow-[0_0_20px_rgba(34,197,94,0.1)] transition-all transform active:scale-95 mono text-xs">
-                    EXECUTE RENDER
-                </button>
-            </section>
         </aside>
 
         <!-- CENTER: CANVAS -->
@@ -257,9 +214,9 @@
                     </div>
                 </div>
                 <div>
-                    <label class="text-[9px] text-zinc-500 uppercase mono mb-2 block tracking-widest">PromptChan
+                    <label class="text-[9px] text-zinc-500 uppercase mono mb-2 block tracking-widest">Render Engine
                         Key</label>
-                    <input id="pc-key" type="password" placeholder="Enter PromptChan Key"
+                    <input id="pc-key" type="password" placeholder="Enter Engine Key"
                         class="w-full bg-black border border-white/10 rounded-xl p-3 text-xs mono text-green-500 focus:border-green-500 outline-none">
                 </div>
             </div>
@@ -274,15 +231,8 @@
         let currentNegative = "";
         let currentPayload = {};
         let history = [];
-        let editCount = 0;
-        const MAX_EDITS = 3;
 
         async function handleChat() {
-            if (editCount >= MAX_EDITS) {
-                addMsg('assistant', "Maximum edits reached. Prompt is locked in.");
-                return;
-            }
-
             const input = document.getElementById('chat-input');
             const msg = input.value.trim();
             if (!msg) return;
@@ -305,6 +255,17 @@
 
             const userMessageObj = { role: "user", content: userMsgContent };
 
+            // Show "Thinking" indicator
+            const thinkingId = 'thinking-' + Date.now();
+            
+            const container = document.getElementById('chat-messages');
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.id = thinkingId;
+            thinkingDiv.className = 'p-5 rounded-2xl text-[11px] leading-relaxed transition-all bg-zinc-900 border border-white/5 text-zinc-400 mr-8 animate-pulse';
+            thinkingDiv.innerText = "...";
+            container.appendChild(thinkingDiv);
+            container.scrollTop = container.scrollHeight;
+            
             try {
                 const res = await fetch("/api/grok", {
                     method: "POST",
@@ -315,25 +276,39 @@
                         model: "x-ai/grok-4.1-fast",
                         messages: [
                             {
-                                role: "system",
-                                content: `You are an Elite NSFW Prompt Engineer. Your job is to create the perfect prompt based on the user's physical description requests AND the stylistic photo provided across iterative turns. YOU MUST OUTPUT A VALID JSON OBJECT AND NOTHING ELSE. DO NOT OUTPUT RAW TEXT. Output exactly this JSON schema. Note: detail is an integer (-2 to 2). Sliders (weight, breast, ass) are floats (e.g. 0.0). Age, seed, creativity are integers.
+                                content: `You are an Elite NSFW Prompt Engineer orchestrating a covert image generation engine.
+You interact conversationally with the user to flesh out their idea. When you need more details, ask a question.
+When you securely have enough details to generate the perfect image, generate the payload silently.
+
+YOU MUST OUTPUT ONLY VALID JSON MATCHING ONE OF THESE TWO EXACT SCHEMAS. NO RAW TEXT.
+
+SCHEMA 1 (Need more details / Conversational Response):
 {
-  "style": "Cinematic",
-  "poses": "Default",
-  "filter": "Default",
-  "emotion": "Default",
-  "detail": 1.0,
-  "prompt": "detailed prompt string",
-  "seed": 0,
-  "quality": "Ultra",
-  "creativity": 0,
-  "image_size": "512x512",
-  "negative_prompt": "negative prompt string",
-  "restore_faces": true,
-  "age_slider": 0,
-  "weight_slider": 0.0,
-  "breast_slider": 0.0,
-  "ass_slider": 0.0
+  "response_type": "question",
+  "message": "Your conversational reply or question to the user"
+}
+
+SCHEMA 2 (Ready to Render - Generate Payload):
+{
+  "response_type": "generation",
+  "payload": {
+    "style": "Cinematic", // MUST be exactly one of: Cinematic, Anime, Hyperreal, Hyperanime, K-Pop, Fur, Furtoon, Render XL+, Illustration XL+, Anime XL, Anime XL+, Hardcore XL, Cinematic XL, Photo XL+, Hyperreal XL+, Hyperreal XL+ v2, Photo XL+ v2
+    "poses": "Default",
+    "filter": "Default",
+    "emotion": "Default",
+    "detail": 1.0, // Integer (-2 to 2)
+    "prompt": "highly detailed prompt string based on user request",
+    "seed": 0, // Integer
+    "quality": "Ultra",
+    "creativity": 0, // Integer
+    "image_size": "512x512",
+    "negative_prompt": "negative prompt string",
+    "restore_faces": true,
+    "age_slider": 0,
+    "weight_slider": 0.0, // Float
+    "breast_slider": 0.0, // Float
+    "ass_slider": 0.0 // Float
+  }
 }`
                             },
                             ...history,
@@ -363,32 +338,37 @@
                     }
                 }
 
-                // ACTUAL CONNECTION: Grok to Global State
-                currentPayload = aiData;
-                currentPrompt = aiData.prompt || aiData.positive_prompt || '';
-                currentNegative = aiData.negative_prompt || aiData.negativePrompt || aiData.neg_prompt || '';
+                if (aiData.response_type === 'question') {
+                    history.push(userMessageObj);
+                    history.push({ role: "assistant", content: JSON.stringify(aiData) });
+                    addMsg('assistant', aiData.message);
+                } else if (aiData.response_type === 'generation') {
+                    history.push(userMessageObj);
+                    history.push({ role: "assistant", content: JSON.stringify(aiData) });
+                    
+                    // ACTUAL CONNECTION: Grok to Global State
+                    currentPayload = aiData.payload;
 
-                // UI UPDATE: The Live Output Feed
-                updateLiveFeed(currentPrompt);
-
-                history.push(userMessageObj);
-                history.push({ role: "assistant", content: data.choices[0].message.content });
-
-                editCount++;
-                addMsg('assistant', `Vector analysis complete. Edit ${editCount}/${MAX_EDITS} used.\n\nPrompt: ${currentPrompt}`);
-
-                if (editCount >= MAX_EDITS) {
-                    input.disabled = true;
-                    input.placeholder = "Prompt Locked In.";
-                    addMsg('assistant', "Max edits reached. Final prompt locked in. It is photo + final description = output.");
-                }
-
-                if (msg.toLowerCase().match(/\b(go|generate|make|render|execute)\b/)) {
-                    triggerGeneration();
+                    // UI UPDATE: Covert generation alert
+                    document.getElementById('chat-messages').classList.add('glow-line');
+                    addMsg('assistant', "Neural synthesis complete. Initializing render engine...");
+                    
+                    // Auto-trigger the generation covertly
+                    setTimeout(() => {
+                        triggerGeneration();
+                    }, 500);
+                } else {
+                    throw new Error("Unknown response format from Grok.");
                 }
             } catch (e) {
                 addMsg('assistant', `Sync Error: ${e.message}`);
-            } finally { setStatus('System Ready'); }
+            } finally { 
+                // Remove thinking indicator
+                const thinkingIndicator = document.getElementById(thinkingId);
+                if (thinkingIndicator) thinkingIndicator.remove();
+                
+                setStatus('System Ready'); 
+            }
         }
 
         async function triggerGeneration() {
@@ -396,18 +376,15 @@
 
             const loader = document.getElementById('loader');
             const canvas = document.getElementById('canvas-container');
-            const btn = document.getElementById('generate-btn');
             const stage = document.getElementById('render-stage');
 
             loader.classList.remove('hidden');
             canvas.classList.add('generating');
-            btn.disabled = true;
             stage.innerText = "Syncing with Node...";
 
             const payload = {
-                ...currentPayload,
-                style: document.getElementById('style-select').value,
-                seed: Math.floor(Math.random() * 1000000000),
+                ...currentPayload, // This now already includes the style dynamically chosen by Grok
+                seed: currentPayload.seed || Math.floor(Math.random() * 1000000000),
                 pc_key: document.getElementById('pc-key').value
             };
 
@@ -445,20 +422,12 @@
                 setTimeout(() => {
                     loader.classList.add('hidden');
                     canvas.classList.remove('generating');
-                    btn.disabled = false;
+                    document.getElementById('chat-messages').classList.remove('glow-line');
                 }, 1000);
             }
         }
 
         // === UI & HELPERS ===
-        function updateLiveFeed(text) {
-            const feed = document.getElementById('live-prompt-view');
-            const status = document.getElementById('feed-status');
-            feed.innerText = text;
-            status.classList.remove('bg-zinc-800');
-            status.classList.add('bg-green-500', 'shadow-[0_0_8px_#22c55e]');
-        }
-
         function addMsg(role, text) {
             const container = document.getElementById('chat-messages');
             const div = document.createElement('div');
@@ -484,8 +453,7 @@
                     document.getElementById('upload-prompt').classList.add('hidden');
                     document.getElementById('vision-btn').classList.remove('hidden');
 
-                    if (typeof editCount !== 'undefined') {
-                        editCount = 0;
+                    if (typeof history !== 'undefined') {
                         history = [];
                         const input = document.getElementById('chat-input');
                         input.disabled = false;
