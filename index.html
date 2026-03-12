@@ -407,7 +407,8 @@
             const payload = {
                 ...currentPayload,
                 style: document.getElementById('style-select').value,
-                seed: Math.floor(Math.random() * 1000000000)
+                seed: Math.floor(Math.random() * 1000000000),
+                pc_key: document.getElementById('pc-key').value
             };
 
             // Redirecting through Vercel Serverless to bypass CORS headers
@@ -418,7 +419,6 @@
                 const res = await fetch(target, {
                     method: "POST",
                     headers: {
-                        "x-api-key": document.getElementById('pc-key').value,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify(payload)
