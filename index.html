@@ -316,13 +316,13 @@
                         messages: [
                             {
                                 role: "system",
-                                content: `You are an Elite NSFW Prompt Engineer. Your job is to create the perfect prompt based on the user's physical description requests AND the stylistic photo provided across iterative turns. Output ONLY valid JSON matching this exact schema. ALL numeric values (detail, sliders, creativity, seed) MUST BE INTEGERS (e.g. 0, 1, 10). NO fractional floats.
+                                content: `You are an Elite NSFW Prompt Engineer. Your job is to create the perfect prompt based on the user's physical description requests AND the stylistic photo provided across iterative turns. Output ONLY valid JSON matching this exact schema. Note: detail is an integer (-2 to 2). Sliders (weight, breast, ass) are floats (e.g. 0.0). Age, seed, creativity are integers.
 {
   "style": "Cinematic",
   "poses": "Default",
   "filter": "Default",
   "emotion": "Default",
-  "detail": 0,
+  "detail": 1.0,
   "prompt": "detailed prompt string",
   "seed": 0,
   "quality": "Ultra",
@@ -331,9 +331,9 @@
   "negative_prompt": "negative prompt string",
   "restore_faces": true,
   "age_slider": 0,
-  "weight_slider": 0,
-  "breast_slider": 0,
-  "ass_slider": 0
+  "weight_slider": 0.0,
+  "breast_slider": 0.0,
+  "ass_slider": 0.0
 }`
                             },
                             ...history,

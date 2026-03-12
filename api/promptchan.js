@@ -4,6 +4,8 @@ export default async function handler(req, res) {
     }
 
     try {
+        // The frontend sends the API key safely inside the JSON payload to bypass Vercel stripping it.
+        // We decouple it here, because PromptChan strictly requires it in the HTTP Header.
         const { pc_key, ...promptChanPayload } = req.body;
         
         if (!pc_key) {
