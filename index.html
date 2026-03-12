@@ -69,7 +69,7 @@
                 <div class="absolute inset-0 w-3 h-3 rounded-full bg-green-400 animate-ping opacity-20"></div>
             </div>
             <h1 class="text-xs font-black tracking-[0.3em] uppercase mono text-white/90">
-                Supergod <span class="text-green-500">Studio</span> Core
+                Supergod <span class="text-green-500">Studios</span>
             </h1>
         </div>
         <div class="flex items-center gap-6">
@@ -159,6 +159,10 @@
                     Data</button>
                 <button onclick="clearCanvas()"
                     class="px-8 py-3 bg-zinc-900 border border-white/10 rounded-full text-[10px] mono uppercase hover:bg-red-500 transition-all">Purge</button>
+            </div>
+            
+            <div class="absolute bottom-6 mx-auto text-[8px] mono uppercase tracking-[0.4em] text-zinc-600 opacity-50 pointer-events-none">
+                Powered by Voss Neural Research
             </div>
         </section>
 
@@ -473,7 +477,7 @@ SCHEMA 2 (Ready to Render - Generate Payload):
             document.getElementById('canvas-placeholder').classList.add('hidden');
             document.getElementById('canvas-actions').classList.remove('hidden');
 
-            addMsg('assistant', "Photo locked on main screen. What is your basic prompt instruction? (0/3 Edits)");
+            addMsg('assistant', "YOOO sick photo! What do you want to do with this? Throw some dirty ideas at me.");
             document.getElementById('chat-input').focus();
         }
         function clearCanvas() {
