@@ -250,7 +250,7 @@
             const hasImage = mainImg.src && !mainImg.classList.contains('hidden');
             let userMsgContent = msg;
 
-            if (editCount === 0 && hasImage) {
+            if (history.length === 0 && hasImage) {
                 userMsgContent = [
                     { type: "text", text: msg },
                     { type: "image_url", image_url: { url: mainImg.src } }
