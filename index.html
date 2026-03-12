@@ -126,8 +126,8 @@
                     (Ref)</label>
                 <div id="dropzone"
                     class="border border-white/5 rounded-2xl h-44 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all relative overflow-hidden bg-zinc-900/20 group">
-                    <input type="file" id="file-upload" class="hidden" accept="image/*">
-                    <div id="upload-prompt" class="text-center group-hover:scale-110 transition-transform">
+                    <input type="file" id="file-upload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50" accept="image/*">
+                    <div id="upload-prompt" class="text-center group-hover:scale-110 transition-transform relative z-40 pointer-events-none">
                         <svg class="mx-auto mb-2 text-zinc-700" width="24" height="24" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="1.5">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -317,24 +317,24 @@
                             {
                                 role: "system",
                                 content: `You are an Elite NSFW Prompt Engineer. Your job is to create the perfect prompt based on the user's physical description requests AND the stylistic photo provided across iterative turns. Output ONLY valid JSON matching this exact schema:
-{
-  "style": "Cinematic",
-  "poses": "Default",
-  "filter": "Default",
-  "emotion": "Default",
-  "detail": 0.0,
-  "prompt": "detailed prompt string",
-  "seed": 0,
-  "quality": "Ultra",
-  "creativity": 0,
-  "image_size": "512x512",
-  "negative_prompt": "negative prompt string",
-  "restore_faces": true,
-  "age_slider": 0,
-  "weight_slider": 0.0,
-  "breast_slider": 0.0,
-  "ass_slider": 0.0
-}`
+                        {
+                            "style": "Cinematic",
+                            "poses": "Default",
+                            "filter": "Default",
+                            "emotion": "Default",
+                            "detail": 0.0,
+                            "prompt": "detailed prompt string",
+                            "seed": 0,
+                            "quality": "Ultra",
+                            "creativity": 0,
+                            "image_size": "512x512",
+                            "negative_prompt": "negative prompt string",
+                            "restore_faces": true,
+                            "age_slider": 0,
+                            "weight_slider": 0.0,
+                            "breast_slider": 0.0,
+                            "ass_slider": 0.0
+                        }`
                             },
                             ...history,
                             userMessageObj
@@ -346,49 +346,49 @@
                 const data = await res.json();
                 if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-                    if(!data.choices?.[0]?.message?.content) {
-                        throw new Error('Invalid response: no choices or content');
-            }
+                if (!data.choices?.[0]?.message?.content) {
+                    throw new Error('Invalid response: no choices or content');
+                }
 
                 let aiData;
-            try {
-                aiData = JSON.parse(data.choices[0].message.content);
-            } catch (e) {
-                const content = data.choices[0].message.content;
-                const jsonMatch = /\{[\s\S]*?\}/.exec(content);
-                if (jsonMatch) {
-                    aiData = JSON.parse(jsonMatch[0]);
-                } else {
-                    throw new Error(`JSON parse failed: ${e.message}. Content preview: ${content.substring(0, 200)}...`);
+                try {
+                    aiData = JSON.parse(data.choices[0].message.content);
+                } catch (e) {
+                    const content = data.choices[0].message.content;
+                    const jsonMatch = /\{[\s\S]*?\}/.exec(content);
+                    if (jsonMatch) {
+                        aiData = JSON.parse(jsonMatch[0]);
+                    } else {
+                        throw new Error(`JSON parse failed: ${e.message}. Content preview: ${content.substring(0, 200)}...`);
+                    }
                 }
-            }
 
-            // ACTUAL CONNECTION: Grok to Global State
-            currentPayload = aiData;
-            currentPrompt = aiData.prompt || aiData.positive_prompt || '';
-            currentNegative = aiData.negative_prompt || aiData.negativePrompt || aiData.neg_prompt || '';
+                // ACTUAL CONNECTION: Grok to Global State
+                currentPayload = aiData;
+                currentPrompt = aiData.prompt || aiData.positive_prompt || '';
+                currentNegative = aiData.negative_prompt || aiData.negativePrompt || aiData.neg_prompt || '';
 
-            // UI UPDATE: The Live Output Feed
-            updateLiveFeed(currentPrompt);
+                // UI UPDATE: The Live Output Feed
+                updateLiveFeed(currentPrompt);
 
-            history.push(userMessageObj);
-            history.push({ role: "assistant", content: data.choices[0].message.content });
+                history.push(userMessageObj);
+                history.push({ role: "assistant", content: data.choices[0].message.content });
 
-            editCount++;
-            addMsg('assistant', `Vector analysis complete. Edit ${editCount}/${MAX_EDITS} used.\n\nPrompt: ${currentPrompt}`);
+                editCount++;
+                addMsg('assistant', `Vector analysis complete. Edit ${editCount}/${MAX_EDITS} used.\n\nPrompt: ${currentPrompt}`);
 
-            if (editCount >= MAX_EDITS) {
-                input.disabled = true;
-                input.placeholder = "Prompt Locked In.";
-                addMsg('assistant', "Max edits reached. Final prompt locked in. It is photo + final description = output.");
-            }
+                if (editCount >= MAX_EDITS) {
+                    input.disabled = true;
+                    input.placeholder = "Prompt Locked In.";
+                    addMsg('assistant', "Max edits reached. Final prompt locked in. It is photo + final description = output.");
+                }
 
-            if (msg.toLowerCase().match(/\b(go|generate|make|render|execute)\b/)) {
-                triggerGeneration();
-            }
-        } catch (e) {
-            addMsg('assistant', `Sync Error: ${e.message}`);
-        } finally { setStatus('System Ready'); }
+                if (msg.toLowerCase().match(/\b(go|generate|make|render|execute)\b/)) {
+                    triggerGeneration();
+                }
+            } catch (e) {
+                addMsg('assistant', `Sync Error: ${e.message}`);
+            } finally { setStatus('System Ready'); }
         }
 
         async function triggerGeneration() {
