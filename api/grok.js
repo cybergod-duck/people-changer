@@ -15,9 +15,10 @@ export default async function handler(req, res) {
         if (requestBody.model && requestBody.model.startsWith("x-ai/grok")) {
             // Delete the strict model key
             delete requestBody.model;
-            // Add OpenRouter's fallback routing array
+            // Add OpenRouter's fallback routing array using valid x-ai tags
             requestBody.models = [
                 "x-ai/grok-3",
+                "x-ai/grok-3-mini",
                 "x-ai/grok-2-1212",
                 "x-ai/grok-2-vision"
             ];
