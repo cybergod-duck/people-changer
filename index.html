@@ -260,6 +260,7 @@
     <script>
         let currentPrompt = "";
         let currentNegative = "";
+        let currentPayload = {};
         let history = [];
         let editCount = 0;
         const MAX_EDITS = 3;
@@ -301,7 +302,26 @@
                     body: JSON.stringify({
                         model: "x-ai/grok-4.1-fast",
                         messages: [
-                            { role: "system", content: 'You are an Elite NSFW Prompt Engineer. Your job is to create the perfect prompt based on the user\'s physical description requests AND the stylistic photo provided across iterative turns. Output ONLY JSON: {"prompt": "Spread Ass, soaking pussy, ass fucked, anal creampie, huge tits...", "negative_prompt": "blurry, ugly..."}' },
+                            {
+                                role: "system",
+                                content: `You are an Elite NSFW Prompt Engineer. Your job is to create the perfect prompt based on the user's physical description requests AND the stylistic photo provided across iterative turns. Output ONLY valid JSON matching this exact schema:
+{
+  "style": "Cinematic",
+  "poses": "Default",
+  "filter": "Default",
+  "emotion": "Default",
+  "detail": 0.0,
+  "prompt": "detailed prompt string",
+  "seed": 0,
+  "quality": "Ultra",
+  "creativity": 0,
+  "image_size": "512x512",
+  "negative_prompt": "negative prompt string",
+  "restore_faces": true,
+  "age_slider": 0,
+  "weight_slider": 0.0
+}`
+                            },
                             ...history,
                             userMessageObj
                         ],
@@ -312,37 +332,53 @@
                 const data = await res.json();
                 if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-                const aiData = JSON.parse(data.choices[0].message.content);
+                    if(!data.choices?.[0]?.message?.content) {
+                        throw new Error('Invalid response: no choices or content');
+            }
 
-                // ACTUAL CONNECTION: Grok to Global State
-                currentPrompt = aiData.prompt;
-                currentNegative = aiData.negative_prompt;
-
-                // UI UPDATE: The Live Output Feed
-                updateLiveFeed(currentPrompt);
-
-                history.push(userMessageObj);
-                history.push({ role: "assistant", content: data.choices[0].message.content });
-
-                editCount++;
-                addMsg('assistant', `Vector analysis complete. Edit ${editCount}/${MAX_EDITS} used.\n\nPrompt: ${currentPrompt}`);
-
-                if (editCount >= MAX_EDITS) {
-                    input.disabled = true;
-                    input.placeholder = "Prompt Locked In.";
-                    addMsg('assistant', "Max edits reached. Final prompt locked in. It is photo + final description = output.");
-                }
-
-                if (msg.toLowerCase().match(/\b(go|generate|make|render|execute)\b/)) {
-                    triggerGeneration();
-                }
+                let aiData;
+            try {
+                aiData = JSON.parse(data.choices[0].message.content);
             } catch (e) {
-                addMsg('assistant', `Sync Error: ${e.message}`);
-            } finally { setStatus('System Ready'); }
+                const content = data.choices[0].message.content;
+                const jsonMatch = /\{[\s\S]*?\}/.exec(content);
+                if (jsonMatch) {
+                    aiData = JSON.parse(jsonMatch[0]);
+                } else {
+                    throw new Error(`JSON parse failed: ${e.message}. Content preview: ${content.substring(0, 200)}...`);
+                }
+            }
+
+            // ACTUAL CONNECTION: Grok to Global State
+            currentPayload = aiData;
+            currentPrompt = aiData.prompt || aiData.positive_prompt || '';
+            currentNegative = aiData.negative_prompt || aiData.negativePrompt || aiData.neg_prompt || '';
+
+            // UI UPDATE: The Live Output Feed
+            updateLiveFeed(currentPrompt);
+
+            history.push(userMessageObj);
+            history.push({ role: "assistant", content: data.choices[0].message.content });
+
+            editCount++;
+            addMsg('assistant', `Vector analysis complete. Edit ${editCount}/${MAX_EDITS} used.\n\nPrompt: ${currentPrompt}`);
+
+            if (editCount >= MAX_EDITS) {
+                input.disabled = true;
+                input.placeholder = "Prompt Locked In.";
+                addMsg('assistant', "Max edits reached. Final prompt locked in. It is photo + final description = output.");
+            }
+
+            if (msg.toLowerCase().match(/\b(go|generate|make|render|execute)\b/)) {
+                triggerGeneration();
+            }
+        } catch (e) {
+            addMsg('assistant', `Sync Error: ${e.message}`);
+        } finally { setStatus('System Ready'); }
         }
 
         async function triggerGeneration() {
-            if (!currentPrompt) return addMsg('assistant', "No prompt DNA detected. Initiate Grok first.");
+            if (!currentPayload) return addMsg('assistant', "No PromptChan payload generated. Initiate Grok first.");
 
             const loader = document.getElementById('loader');
             const canvas = document.getElementById('canvas-container');
@@ -355,14 +391,8 @@
             stage.innerText = "Syncing with Node...";
 
             const payload = {
-                prompt: currentPrompt,
-                negative_prompt: currentNegative || "blurry, low quality, distorted, watermark",
-                style: document.getElementById('style-select').value,
-                image_size: "768x1024",
-                quality: "Ultra",
-                creativity: 55,
-                seed: Math.floor(Math.random() * 1000000000),
-                restore_faces: true
+                ...currentPayload,
+                seed: Math.floor(Math.random() * 1000000000)
             };
 
             // Redirecting through Vercel Serverless to bypass CORS headers
