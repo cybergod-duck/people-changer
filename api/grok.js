@@ -18,8 +18,8 @@ export default async function handler(req, res) {
             // Add OpenRouter's fallback routing array using valid x-ai tags
             requestBody.models = [
                 "x-ai/grok-4.1-fast",
-                "x-ai/grok-4",
-                "x-ai/grok-vision-beta"
+                "x-ai/grok-4-fast",
+                "x-ai/grok-4"
             ];
         }
 
