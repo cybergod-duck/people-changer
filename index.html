@@ -319,7 +319,9 @@
   "negative_prompt": "negative prompt string",
   "restore_faces": true,
   "age_slider": 0,
-  "weight_slider": 0.0
+  "weight_slider": 0.0,
+  "breast_slider": 0.0,
+  "ass_slider": 0.0
 }`
                             },
                             ...history,
@@ -392,6 +394,7 @@
 
             const payload = {
                 ...currentPayload,
+                style: document.getElementById('style-select').value,
                 seed: Math.floor(Math.random() * 1000000000)
             };
 
