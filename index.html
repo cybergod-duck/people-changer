@@ -476,9 +476,11 @@ SCHEMA 2 (Ready to Render - Generate Payload):
             mainImg.classList.remove('hidden');
             document.getElementById('canvas-placeholder').classList.add('hidden');
             document.getElementById('canvas-actions').classList.remove('hidden');
-
-            addMsg('assistant', "YOOO sick photo! What do you want to do with this? Throw some dirty ideas at me.");
-            document.getElementById('chat-input').focus();
+            
+            // Auto trigger Grok vision analysis instead of static text
+            const input = document.getElementById('chat-input');
+            input.value = "Here is my Visual DNA reference. What do you think of this? Describe what you see and ask me how we should remix it.";
+            await handleChat();
         }
         function clearCanvas() {
             document.getElementById('main-image').classList.add('hidden');
