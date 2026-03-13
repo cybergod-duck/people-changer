@@ -4,12 +4,12 @@ export default async function handler(req, res) {
     }
 
     try {
-        // The frontend sends the API key safely inside the JSON payload to bypass Vercel stripping it.
-        // We decouple it here, because PromptChan strictly requires it in the HTTP Header.
-        const { pc_key, ...promptChanPayload } = req.body;
+        // We use the environment variable for PromptChan API key so users don't have to provide it
+        const pc_key = process.env.PROMPTCHAN_API_KEY;
+        const promptChanPayload = req.body;
         
         if (!pc_key) {
-             return res.status(401).json({ error: 'x-api-key header missing. Please enter your PromptChan API key in the Settings modal!' });
+             return res.status(500).json({ error: 'PROMPTCHAN_API_KEY not configured in Vercel Environment Variables.' });
         }
 
         console.log("=== PROMPTCHAN REQUEST ===");
