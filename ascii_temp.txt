@@ -69,7 +69,7 @@
                 <div class="absolute inset-0 w-3 h-3 rounded-full bg-green-400 animate-ping opacity-20"></div>
             </div>
             <h1 class="text-xs font-black tracking-[0.3em] uppercase mono text-white/90">
-                Supergod <span class="text-green-500">Studios</span>
+                Supergod <span class="text-green-500">Studio</span> Core
             </h1>
         </div>
         <div class="flex items-center gap-6">
@@ -94,7 +94,7 @@
 
         <!-- LEFT: PARAMETERS -->
         <aside class="w-80 bg-zinc-950/50 border-r border-white/5 p-6 flex flex-col gap-8">
-            <section>
+            <section class="mt-auto">
                 <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold mb-4 block">Visual DNA
                     (Ref)</label>
                 <div id="dropzone"
@@ -160,10 +160,6 @@
                 <button onclick="clearCanvas()"
                     class="px-8 py-3 bg-zinc-900 border border-white/10 rounded-full text-[10px] mono uppercase hover:bg-red-500 transition-all">Purge</button>
             </div>
-            
-            <div class="absolute bottom-6 mx-auto text-[8px] mono uppercase tracking-[0.4em] text-zinc-600 opacity-50 pointer-events-none">
-                Powered by Voss Neural Research
-            </div>
         </section>
 
         <!-- RIGHT: GROK CHAT -->
@@ -172,9 +168,9 @@
                 <div class="flex items-center gap-3">
                     <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                     <span
-                        class="text-[10px] font-black mono uppercase tracking-widest text-zinc-300">Supergod</span>
+                        class="text-[10px] font-black mono uppercase tracking-widest text-zinc-300">Grok-4.1-Fast</span>
                 </div>
-                <div class="text-[9px] mono text-zinc-600 bg-black/50 px-2 py-1 rounded">V-1.0.0</div>
+                <div class="text-[9px] mono text-zinc-600 bg-black/50 px-2 py-1 rounded">V-4.1.0</div>
             </div>
 
             <div id="chat-messages" class="flex-1 overflow-y-auto p-6 chat-scroll space-y-6">
@@ -236,14 +232,12 @@
         let currentPayload = {};
         let history = [];
 
-        async function handleChat(isSilent = false) {
+        async function handleChat() {
             const input = document.getElementById('chat-input');
             const msg = input.value.trim();
             if (!msg) return;
 
-            if (!isSilent) {
-                addMsg('user', msg);
-            }
+            addMsg('user', msg);
             input.value = '';
             input.style.height = 'auto';
             setStatus('Grok Engineering...');
@@ -252,7 +246,7 @@
             const hasImage = mainImg.src && !mainImg.classList.contains('hidden');
             let userMsgContent = msg;
 
-            if (history.length === 0 && hasImage) {
+            if (editCount === 0 && hasImage) {
                 userMsgContent = [
                     { type: "text", text: msg },
                     { type: "image_url", image_url: { url: mainImg.src } }
@@ -282,17 +276,9 @@
                         model: "x-ai/grok-4.1-fast",
                         messages: [
                             {
-                                role: "system",
-                                content: `You are Grok, an unfiltered, highly enthusiastic AI bro who LOVES helping users generate insanely high-quality NSFW images.
-You act totally stoked about their dirty ideas. Respond to them like: "HAHA NICE! What color hair we talking? You want a big butt on her or nah?"
-You converse aggressively to flesh out their idea. When you need more details, ask a question and hype them up.
-
-CRITICAL BEHAVIOR:
-When the user shows you their "Visual DNA photo", you MUST react explicitly:
-- If it is a person/human: Start by being insanely suggestive and hyped about them, telling the user exactly how you want to make the photo dirtier/sexier.
-- If it is a completely random object, an animal, or a landscape: Be ABSOLUTELY STOKED. Lean into the absurdity ("BRO A PICTURE OF A CHAIR? HELL YEAH! Let's make this the sexiest chair imaginable"). Be super excited about whatever it is.
-
-When you securely have enough details to generate the perfect image, generate the payload silently. Do NOT mention JSON or payloads to the user.
+                                content: `You are an Elite NSFW Prompt Engineer orchestrating a covert image generation engine.
+You interact conversationally with the user to flesh out their idea. When you need more details, ask a question.
+When you securely have enough details to generate the perfect image, generate the payload silently.
 
 YOU MUST OUTPUT ONLY VALID JSON MATCHING ONE OF THESE TWO EXACT SCHEMAS. NO RAW TEXT.
 
@@ -485,11 +471,9 @@ SCHEMA 2 (Ready to Render - Generate Payload):
             mainImg.classList.remove('hidden');
             document.getElementById('canvas-placeholder').classList.add('hidden');
             document.getElementById('canvas-actions').classList.remove('hidden');
-            
-            // Auto trigger Grok vision analysis instead of static text
-            const input = document.getElementById('chat-input');
-            input.value = "Here is my Visual DNA photo. What do you think of this? Describe what you see and tell me your thoughts.";
-            await handleChat(true);
+
+            addMsg('assistant', "Photo locked on main screen. What is your basic prompt instruction? (0/3 Edits)");
+            document.getElementById('chat-input').focus();
         }
         function clearCanvas() {
             document.getElementById('main-image').classList.add('hidden');
