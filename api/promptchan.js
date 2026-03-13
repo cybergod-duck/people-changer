@@ -21,7 +21,7 @@ function toPromptchanPayload(input) {
   // Map to exact field names per debug advice (no underscores where suggested)
   return {
     style: input.style,
-    poses: input.poses || { "SD Styles (Cinematic, Anime, Hyperreal, Hyperanime, K-Pop, Fur, Furtoon)": ["Default"] },
+    poses: typeof input.poses === 'string' ? input.poses : "Default",
     filter: input.filter,
     emotion: input.emotion,
     detail: parseFloat(input.detail ?? 0),

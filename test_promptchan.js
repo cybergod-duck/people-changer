@@ -8,9 +8,7 @@ async function testPromptChan() {
     
     const payload = {
         style: "Cinematic",
-        poses: {
-            "SD Styles (Cinematic, Anime, Hyperreal, Hyperanime, K-Pop, Fur, Furtoon)": ["Default"]
-        },
+        poses: "Default",
         filter: "Default",
         emotion: "Default",
         detail: 1,
