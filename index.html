@@ -399,6 +399,11 @@ SCHEMA 2 (Ready to Render - Generate Payload):
             const payload = {
                 ...currentPayload, // This now already includes the style dynamically chosen by Grok
                 seed: currentPayload.seed || Math.floor(Math.random() * 1000000000),
+                detail: parseFloat(currentPayload.detail) || 1.0,
+                age_slider: parseInt(currentPayload.age_slider) || 0,
+                weight_slider: parseFloat(currentPayload.weight_slider) || 0,
+                breast_slider: parseFloat(currentPayload.breast_slider) || 0,
+                ass_slider: parseFloat(currentPayload.ass_slider) || 0,
                 pc_key: document.getElementById('pc-key').value
             };
 

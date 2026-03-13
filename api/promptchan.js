@@ -12,6 +12,10 @@ export default async function handler(req, res) {
              return res.status(401).json({ error: 'x-api-key header missing. Please enter your PromptChan API key in the Settings modal!' });
         }
 
+        console.log("=== PROMPTCHAN REQUEST ===");
+        console.log("Endpoint: https://prod.aicloudnetservices.com/api/external/create");
+        console.log("Payload:", JSON.stringify(promptChanPayload, null, 2));
+
         const response = await fetch("https://prod.aicloudnetservices.com/api/external/create", {
             method: "POST",
             headers: {
@@ -23,7 +27,15 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             const errTxt = await response.text();
-            throw new Error(errTxt || "PromptChan Gateway Timeout");
+            console.error("=== PROMPTCHAN ERROR ===");
+            console.error("Status:", response.status);
+            console.error("Body:", errTxt);
+            
+            // Structured error for the frontend
+            return res.status(502).json({ 
+                error: `Render engine (PromptChan) returned status ${response.status}.`, 
+                details: errTxt 
+            });
         }
 
         const data = await response.json();
