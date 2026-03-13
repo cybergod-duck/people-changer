@@ -1,3 +1,4 @@
+    <script>
         let currentPrompt = "";
         let currentNegative = "";
         let currentPayload = {};
@@ -250,3 +251,4 @@
         window.onload = () => { setupDragAndDrop(); };
         const tx = document.getElementById('chat-input');
         tx.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
+    </script>
