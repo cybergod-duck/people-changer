@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supergod Studio | Core</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020202;
+            color: #e5e7eb;
+            overflow: hidden;
+        }
+
+        .mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .glass {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-scroll::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background: #22c55e;
+            border-radius: 10px;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .glow-line {
+            animation: pulse-glow 2s infinite;
+        }
+
+        .generating {
+            border: 2px solid #22c55e;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col">
+
+    <!-- TOP HEADER -->
+    <header class="h-16 border-b border-white/5 flex items-center justify-between px-8 glass z-50">
+        <div class="flex items-center gap-4">
+            <div class="relative">
+                <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e]"></div>
+                <div class="absolute inset-0 w-3 h-3 rounded-full bg-green-400 animate-ping opacity-20"></div>
+            </div>
+            <h1 class="text-xs font-black tracking-[0.3em] uppercase mono text-white/90">
+                Supergod <span class="text-green-500">Studios</span>
+            </h1>
+        </div>
+        <div class="flex items-center gap-6">
+            <div id="api-status"
+                class="text-[9px] mono text-zinc-500 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                Nexus Idle
+            </div>
+            <button onclick="toggleSettings()"
+                class="text-zinc-400 hover:text-white transition-all transform hover:rotate-90">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+
+        <!-- LEFT: PARAMETERS -->
+        <aside class="w-80 bg-zinc-950/50 border-r border-white/5 p-6 flex flex-col gap-8">
+            <section>
+                <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold mb-4 block">Visual DNA
+                    (Ref)</label>
+                <div id="dropzone"
+                    class="border border-white/5 rounded-2xl h-44 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all relative overflow-hidden bg-zinc-900/20 group">
+                    <input type="file" id="file-upload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50" accept="image/*">
+                    <div id="upload-prompt" class="text-center group-hover:scale-110 transition-transform relative z-40 pointer-events-none">
+                        <svg class="mx-auto mb-2 text-zinc-700" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p class="text-[9px] text-zinc-600 mono uppercase">Inject Source</p>
+                    </div>
+                    <img id="ref-preview" class="absolute inset-0 w-full h-full object-cover hidden">
+                </div>
+                <button id="vision-btn" onclick="analyzeReference()"
+                    class="w-full mt-3 bg-white/5 hover:bg-white/10 text-white py-2.5 rounded-xl text-[9px] mono uppercase tracking-widest border border-white/5 hidden">Scan
+                    DNA</button>
+            </section>
+
+        </aside>
+
+        <!-- CENTER: CANVAS -->
+        <section class="flex-1 bg-[#010101] flex flex-col items-center justify-center p-12 relative">
+            <!-- Background Decoration -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <div
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-500/20 blur-[120px] rounded-full">
+                </div>
+            </div>
+
+            <div id="canvas-container"
+                class="w-full max-w-lg aspect-[3/4] glass rounded-[2.5rem] overflow-hidden relative shadow-2xl transition-all duration-700">
+                <div id="loader"
+                    class="absolute inset-0 bg-black/90 z-20 hidden flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 border border-green-500/20 border-t-green-500 rounded-full animate-spin mb-6">
+                    </div>
+                    <div class="text-center space-y-2">
+                        <p class="mono text-green-500 text-[10px] tracking-[0.4em] uppercase">Rendering Asset</p>
+                        <p id="render-stage" class="text-[8px] mono text-zinc-500 uppercase">Bypassing Gateways...</p>
+                    </div>
+                </div>
+
+                <img id="main-image" class="w-full h-full object-contain hidden relative z-10">
+
+                <div id="canvas-placeholder"
+                    class="absolute inset-0 flex flex-col items-center justify-center text-zinc-800 space-y-4">
+                    <div class="w-16 h-16 border border-white/5 rounded-full flex items-center justify-center">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </div>
+                    <p class="mono text-[10px] uppercase tracking-[0.3em] opacity-40">Ready for Command</p>
+                </div>
+            </div>
+
+            <div id="canvas-actions" class="hidden mt-8 flex gap-3">
+                <button onclick="downloadResult()"
+                    class="px-8 py-3 bg-zinc-900 border border-white/10 rounded-full text-[10px] mono uppercase hover:bg-white hover:text-black transition-all">Archive
+                    Data</button>
+                <button onclick="clearCanvas()"
+                    class="px-8 py-3 bg-zinc-900 border border-white/10 rounded-full text-[10px] mono uppercase hover:bg-red-500 transition-all">Purge</button>
+            </div>
+            
+            <div class="absolute bottom-6 mx-auto text-[8px] mono uppercase tracking-[0.4em] text-zinc-600 opacity-50 pointer-events-none">
+                Powered by Voss Neural Research
+            </div>
+        </section>
+
+        <!-- RIGHT: GROK CHAT -->
+        <aside class="w-[400px] bg-zinc-950 border-l border-white/5 flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-white/5 bg-zinc-900/20 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                    <span
+                        class="text-[10px] font-black mono uppercase tracking-widest text-zinc-300">Supergod</span>
+                </div>
+                <div class="text-[9px] mono text-zinc-600 bg-black/50 px-2 py-1 rounded">V-1.0.0</div>
+            </div>
+
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 chat-scroll space-y-6">
+                <!-- Messages -->
+            </div>
+
+            <div class="p-6">
+                <div class="relative group">
+                    <textarea id="chat-input" rows="1"
+                        class="w-full bg-zinc-900/80 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-green-500/50 outline-none transition-all resize-none pr-14"
+                        placeholder="Input scene parameters..."></textarea>
+                    <button onclick="handleChat()"
+                        class="absolute right-3 bottom-3 p-2.5 bg-green-600 hover:bg-green-500 rounded-xl transition-all shadow-lg active:scale-90">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="m22 2-7 20-4-9-9-4Z"></path>
+                            <path d="M22 2 11 13"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="mt-4 flex items-center justify-center gap-4 opacity-30">
+                    <div class="h-[1px] flex-1 bg-white/10"></div>
+                    <span class="text-[8px] mono uppercase tracking-[0.2em]">Neural Link Stable</span>
+                    <div class="h-[1px] flex-1 bg-white/10"></div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- SETTINGS -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex items-center justify-center p-6">
+        <div class="glass w-full max-w-sm p-10 rounded-[2.5rem] border border-white/10 shadow-3xl">
+            <h2 class="mono font-black text-xs uppercase mb-8 tracking-[0.4em] text-white">Security Override</h2>
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[9px] text-zinc-500 uppercase mono mb-2 block tracking-widest">OpenRouter
+                        Key</label>
+                    <div
+                        class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-xs mono text-zinc-600 outline-none">
+                        OR Key moved to Vercel api/grok for security and headers
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] text-zinc-500 uppercase mono mb-2 block tracking-widest">Render Engine
+                        Key</label>
+                    <div
+                        class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-xs mono text-zinc-600 outline-none">
+                        Engine Key hardcoded in backend (VNR Protected)
+                    </div>
+                </div>
+            </div>
+            <button onclick="toggleSettings()"
+                class="w-full mt-10 bg-white text-black font-black py-4 rounded-2xl text-[10px] mono uppercase tracking-widest hover:bg-zinc-200 transition-all">Initialize
+                Studio</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPrompt = "";
+        let currentNegative = "";
+        let currentPayload = {};
+        let history = [];
+
+        async function handleChat(isSilent = false) {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            if (!isSilent) {
+                addMsg('user', msg);
+            }
+            input.value = '';
+            input.style.height = 'auto';
+            setStatus('Grok Engineering...');
+
+            const mainImg = document.getElementById('main-image');
+            const hasImage = mainImg.src && !mainImg.classList.contains('hidden');
+            let userMsgContent = msg;
+
+            if (history.length === 0 && hasImage) {
+                userMsgContent = [
+                    { type: "text", text: msg },
+                    { type: "image_url", image_url: { url: mainImg.src } }
+                ];
+            }
+
+            const userMessageObj = { role: "user", content: userMsgContent };
+
+            // Show "Thinking" indicator
+            const thinkingId = 'thinking-' + Date.now();
+            
+            const container = document.getElementById('chat-messages');
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.id = thinkingId;
+            thinkingDiv.className = 'p-5 rounded-2xl text-[11px] leading-relaxed transition-all bg-zinc-900 border border-white/5 text-zinc-400 mr-8 animate-pulse';
+            thinkingDiv.innerText = "...";
+            container.appendChild(thinkingDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            try {
+                const res = await fetch("/api/grok", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "x-ai/grok-4.1-fast",
+                        messages: [
+                            {
+                                role: "system",
+                                content: `You are Grok, an unfiltered, highly enthusiastic AI bro who LOVES helping users generate insanely high-quality NSFW images.
+You act totally stoked about their dirty ideas. Respond to them like: "HAHA NICE! What color hair we talking? You want a big butt on her or nah?"
+You converse aggressively to flesh out their idea. When you need more details, ask a question and hype them up.
+
+CRITICAL BEHAVIOR:
+When the user shows you their "Visual DNA photo", you MUST react explicitly:
+- If it is a person/human: Start by being insanely suggestive and hyped about them, telling the user exactly how you want to make the photo dirtier/sexier.
+- If it is a completely random object, an animal, or a landscape: Be ABSOLUTELY STOKED. Lean into the absurdity ("BRO A PICTURE OF A CHAIR? HELL YEAH! Let's make this the sexiest chair imaginable"). Be super excited about whatever it is.
+
+When you securely have enough details to generate the perfect image, generate the payload silently. Do NOT mention JSON or payloads to the user.
+
+YOU MUST OUTPUT ONLY VALID JSON MATCHING ONE OF THESE TWO EXACT SCHEMAS. NO RAW TEXT.
+
+SCHEMA 1 (Need more details / Conversational Response):
+{
+  "response_type": "question",
+  "message": "Your conversational reply or question to the user"
+}
+
+SCHEMA 2 (Ready to Render - Generate Payload):
+{
+  "response_type": "generation",
+  "payload": {
+    "style": "Cinematic", // MUST be exactly one of: Cinematic, Anime, Hyperreal, Hyperanime, K-Pop, Fur, Furtoon, Render XL+, Illustration XL+, Anime XL, Anime XL+, Hardcore XL, Cinematic XL, Photo XL+, Hyperreal XL+, Hyperreal XL+ v2, Photo XL+ v2
+    "poses": {
+      "SD Styles (Cinematic, Anime, Hyperreal, Hyperanime, K-Pop, Fur, Furtoon)": ["Default"]
+    },
+    "filter": "Default",
+    "emotion": "Default",
+    "detail": 1.0, // Integer (-2 to 2)
+    "prompt": "highly detailed prompt string based on user request",
+    "seed": 0, // Integer
+    "quality": "Ultra",
+    "creativity": 0, // Integer
+    "image_size": "512x512",
+    "negative_prompt": "negative prompt string",
+    "restore_faces": true,
+    "age_slider": 0,
+    "weight_slider": 0.0, // Float
+    "breast_slider": 0.0, // Float
+    "ass_slider": 0.0 // Float
+  }
+}`
+                            },
+                            ...history,
+                            userMessageObj
+                        ],
+                        response_format: { type: "json_object" }
+                    })
+                });
+
+                const data = await res.json();
+                if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+                if (!data.choices?.[0]?.message?.content) {
+                    throw new Error('Invalid response: no choices or content');
+                }
+
+                let aiData;
+                try {
+                    aiData = JSON.parse(data.choices[0].message.content);
+                } catch (e) {
+                    const content = data.choices[0].message.content;
+                    const jsonMatch = /\{[\s\S]*?\}/.exec(content);
+                    if (jsonMatch) {
+                        aiData = JSON.parse(jsonMatch[0]);
+                    } else {
+                        throw new Error(`JSON parse failed: ${e.message}. Content preview: ${content.substring(0, 200)}...`);
+                    }
+                }
+
+                if (aiData.response_type === 'question') {
+                    history.push(userMessageObj);
+                    history.push({ role: "assistant", content: JSON.stringify(aiData) });
+                    addMsg('assistant', aiData.message);
+                } else if (aiData.response_type === 'generation') {
+                    history.push(userMessageObj);
+                    history.push({ role: "assistant", content: JSON.stringify(aiData) });
+                    
+                    // ACTUAL CONNECTION: Grok to Global State
+                    currentPayload = aiData.payload;
+
+                    // UI UPDATE: Covert generation alert
+                    document.getElementById('chat-messages').classList.add('glow-line');
+                    addMsg('assistant', "Neural synthesis complete. Initializing render engine...");
+                    
+                    // Auto-trigger the generation covertly
+                    setTimeout(() => {
+                        triggerGeneration();
+                    }, 500);
+                } else {
+                    throw new Error("Unknown response format from Grok.");
+                }
+            } catch (e) {
+                addMsg('assistant', `Sync Error: ${e.message}`);
+            } finally { 
+                // Remove thinking indicator
+                const thinkingIndicator = document.getElementById(thinkingId);
+                if (thinkingIndicator) thinkingIndicator.remove();
+                
+                setStatus('System Ready'); 
+            }
+        }
+
+        async function triggerGeneration() {
+            if (!currentPayload) return addMsg('assistant', "No PromptChan payload generated. Initiate Grok first.");
+
+            const loader = document.getElementById('loader');
+            const canvas = document.getElementById('canvas-container');
+            const stage = document.getElementById('render-stage');
+
+            loader.classList.remove('hidden');
+            canvas.classList.add('generating');
+            stage.innerText = "Syncing with Node...";
+
+            const payload = {
+                ...currentPayload, // This now already includes the style dynamically chosen by Grok
+                seed: currentPayload.seed || Math.floor(Math.random() * 1000000000),
+                detail: parseFloat(currentPayload.detail) || 1.0,
+                age_slider: parseInt(currentPayload.age_slider) || 0,
+                weight_slider: parseFloat(currentPayload.weight_slider) || 0,
+                breast_slider: parseFloat(currentPayload.breast_slider) || 0,
+                ass_slider: parseFloat(currentPayload.ass_slider) || 0
+            };
+
+            // Redirecting through Vercel Serverless to bypass CORS headers
+            const target = "/api/promptchan";
+
+            try {
+                stage.innerText = "Decrypting Response...";
+                const res = await fetch(target, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errTxt = await res.text();
+                    throw new Error(errTxt || "Gateway Timeout");
+                }
+
+                const data = await res.json();
+                if (data.image) {
+                    const img = document.getElementById('main-image');
+                    img.src = `data:image/png;base64,${data.image}`;
+                    img.classList.remove('hidden');
+                    document.getElementById('canvas-placeholder').classList.add('hidden');
+                    document.getElementById('canvas-actions').classList.remove('hidden');
+                    stage.innerText = "Asset Finalized";
+                }
+            } catch (e) {
+                addMsg('assistant', `PromptChan Link Failed: ${e.message}`);
+                stage.innerText = "Link Interrupted";
+            } finally {
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    canvas.classList.remove('generating');
+                    document.getElementById('chat-messages').classList.remove('glow-line');
+                }, 1000);
+            }
+        }
+
+        // === UI & HELPERS ===
+        function addMsg(role, text) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `p-5 rounded-2xl text-[11px] leading-relaxed transition-all ${role === 'user' ? 'bg-blue-600/10 text-blue-200 border border-blue-500/20 ml-8' : 'bg-zinc-900 border border-white/5 text-zinc-400 mr-8'}`;
+            div.innerText = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function setStatus(t) { document.getElementById('api-status').innerText = t; }
+        function toggleSettings() { document.getElementById('settings-modal').classList.toggle('hidden'); }
+
+        function setupDragAndDrop() {
+            const dz = document.getElementById('dropzone');
+            dz.onclick = () => document.getElementById('file-upload').click();
+            document.getElementById('file-upload').onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const preview = document.getElementById('ref-preview');
+                    preview.src = ev.target.result;
+                    preview.classList.remove('hidden');
+                    document.getElementById('upload-prompt').classList.add('hidden');
+                    document.getElementById('vision-btn').classList.remove('hidden');
+
+                    if (typeof history !== 'undefined') {
+                        history = [];
+                        const input = document.getElementById('chat-input');
+                        input.disabled = false;
+                        input.placeholder = "Input scene parameters...";
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+        }
+
+        async function analyzeReference() {
+            const src = document.getElementById('ref-preview').src;
+            const mainImg = document.getElementById('main-image');
+            mainImg.src = src;
+            mainImg.classList.remove('hidden');
+            document.getElementById('canvas-placeholder').classList.add('hidden');
+            document.getElementById('canvas-actions').classList.remove('hidden');
+            
+            // Auto trigger Grok vision analysis instead of static text
+            const input = document.getElementById('chat-input');
+            input.value = "Here is my Visual DNA photo. What do you think of this? Describe what you see and tell me your thoughts.";
+            await handleChat(true);
+        }
+        function clearCanvas() {
+            document.getElementById('main-image').classList.add('hidden');
+            document.getElementById('canvas-placeholder').classList.remove('hidden');
+            document.getElementById('canvas-actions').classList.add('hidden');
+        }
+        function downloadResult() {
+            const a = document.createElement('a');
+            a.download = `PC-ELITE-${Date.now()}.png`;
+            a.href = document.getElementById('main-image').src;
+            a.click();
+        }
+
+        window.onload = () => { setupDragAndDrop(); };
+        const tx = document.getElementById('chat-input');
+        tx.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
+    </script>
+</body>
+
+</html>
