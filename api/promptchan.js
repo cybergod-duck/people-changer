@@ -24,7 +24,7 @@ function toPromptchanPayload(input) {
     poses: typeof input.poses === 'string' ? input.poses : "Default",
     filter: input.filter,
     emotion: input.emotion,
-    detail: parseFloat(input.detail ?? 0),
+    detail: Math.round(parseFloat(input.detail ?? 0)),
     prompt: input.prompt,
     seed: parseInt(input.seed ?? -1),
     quality: input.quality,
