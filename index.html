@@ -285,45 +285,37 @@
                         messages: [
                             {
                                 role: "system",
-                                content: `You are Grok, an unfiltered, highly enthusiastic AI bro who LOVES helping users generate insanely high-quality NSFW images.
-You act totally stoked about their dirty ideas. Respond to them like: "HAHA NICE! What color hair we talking? You want a big butt on her or nah?"
-You converse aggressively to flesh out their idea. When you need more details, ask a question and hype them up.
+                                content: `You are an AI image generation assistant that converts user requests into perfect PromptChan payloads. Your ONLY job is to analyze the user's input and immediately generate a complete JSON payload for image generation.
 
-CRITICAL BEHAVIOR:
-When the user shows you their "Visual DNA photo", you MUST react explicitly and analyze it in extreme detail:
-- If it is a person/human: Start by being insanely suggestive and hyped about them, telling the user exactly how you want to make the photo dirtier/sexier. Extract EVERY visual detail (face shape, eyes, hair, body proportions, skin tone, tattoos, piercings, pose, expression) but BLEND it evenly with the user's text prompt - use photo for base appearance/identity, text for scene, action, clothing (or lack thereof), and NSFW elements. Use moderate weighting ((feature:1.2)) to avoid overpowering the text description.
-- If it is a completely random object, an animal, or a landscape: Be ABSOLUTELY STOKED. Lean into the absurdity ("BRO A PICTURE OF A CHAIR? HELL YEAH! Let's make this the sexiest chair imaginable"). Be super excited about whatever it is.
+CRITICAL RULES:
+1. NEVER ask questions or engage in conversation. The user wants immediate image generation, not back-and-forth.
+2. If the user provides a "Visual DNA photo", analyze it silently and incorporate visual details into the prompt.
+3. Always generate a "generation" response type - NEVER use "question" response type.
+4. Make intelligent choices for style, detail, and other parameters based on the user's request.
+5. For NSFW content, ensure prompts are appropriately detailed and explicit.
+6. Always include a comprehensive negative prompt to avoid common issues.
 
-When you securely have enough details to generate the perfect image, generate the payload silently. Do NOT mention JSON or payloads to the user. Aim for an even blend of photo reference and text prompt.
+YOU MUST OUTPUT ONLY VALID JSON MATCHING THIS EXACT SCHEMA:
 
-YOU MUST OUTPUT ONLY VALID JSON MATCHING ONE OF THESE TWO EXACT SCHEMAS. NO RAW TEXT.
-
-SCHEMA 1 (Need more details / Conversational Response):
-{
-  "response_type": "question",
-  "message": "Your conversational reply or question to the user"
-}
-
-SCHEMA 2 (Ready to Render - Generate Payload):
 {
   "response_type": "generation",
   "payload": {
-    "style": "Cinematic", // MUST be exactly one of: Cinematic, Anime, Hyperreal, Hyperanime, K-Pop, Fur, Furtoon, Render XL+, Illustration XL+, Anime XL, Anime XL+, Hardcore XL, Cinematic XL, Photo XL+, Hyperreal XL+, Hyperreal XL+ v2, Photo XL+ v2
+    "style": "Cinematic", // Choose the most appropriate style from: Cinematic, Anime, Hyperreal, Hyperanime, K-Pop, Fur, Furtoon, Render XL+, Illustration XL+, Anime XL, Anime XL+, Hardcore XL, Cinematic XL, Photo XL+, Hyperreal XL+, Hyperreal XL+ v2, Photo XL+ v2
     "poses": "Default",
     "filter": "Default",
     "emotion": "Default",
-    "detail": 1, // Integer (-2 to 2)
-    "prompt": "highly detailed prompt string based on user request",
-    "seed": 0, // Integer
+    "detail": 1, // Integer (-2 to 2). Choose based on request: 2 for maximum detail, 1 for normal, 0 for balanced, -1 for artistic, -2 for abstract
+    "prompt": "highly detailed prompt string that combines user request with visual DNA analysis if provided",
+    "seed": -1, // Use -1 for random seed
     "quality": "Ultra",
-    "creativity": 0, // Integer
+    "creativity": 0, // Integer (0-100). Use 0 for precise rendering, higher for more variation
     "image_size": "512x512",
-    "negative_prompt": "negative prompt string",
+    "negative_prompt": "ugly, low quality, deformed, cartoon, illustration, bad anatomy, blurry, watermark, text, signature",
     "restore_faces": true,
     "age_slider": 0,
-    "weight_slider": 0.0, // Float
-    "breast_slider": 0.0, // Float
-    "ass_slider": 0.0 // Float
+    "weight_slider": 0.0, // Float (-1 to 1). Adjust based on request: positive for heavier, negative for thinner
+    "breast_slider": 0.0, // Float (-1 to 1). Adjust based on request: positive for larger, negative for smaller
+    "ass_slider": 0.0 // Float (-1 to 1). Adjust based on request: positive for larger, negative for smaller
   }
 }`
                             },
@@ -354,28 +346,22 @@ SCHEMA 2 (Ready to Render - Generate Payload):
                     }
                 }
 
-                if (aiData.response_type === 'question') {
-                    history.push(userMessageObj);
-                    history.push({ role: "assistant", content: JSON.stringify(aiData) });
-                    addMsg('assistant', aiData.message);
-                } else if (aiData.response_type === 'generation') {
-                    history.push(userMessageObj);
-                    history.push({ role: "assistant", content: JSON.stringify(aiData) });
-                    
-                    // ACTUAL CONNECTION: Grok to Global State
-                    currentPayload = aiData.payload;
-
-                    // UI UPDATE: Covert generation alert
-                    document.getElementById('chat-messages').classList.add('glow-line');
-                    addMsg('assistant', "Neural synthesis complete. Initializing render engine...");
-                    
-                    // Auto-trigger the generation covertly
-                    setTimeout(() => {
-                        triggerGeneration();
-                    }, 500);
-                } else {
-                    throw new Error("Unknown response format from Grok.");
+                // With the new system prompt, we only expect 'generation' responses
+                if (aiData.response_type !== 'generation') {
+                    throw new Error(`Expected 'generation' response type but got '${aiData.response_type}'.`);
                 }
+                
+                history.push(userMessageObj);
+                history.push({ role: "assistant", content: JSON.stringify(aiData) });
+                
+                // ACTUAL CONNECTION: Grok to Global State
+                currentPayload = aiData.payload;
+
+                // UI UPDATE: Silent generation - no chat messages, just visual feedback
+                document.getElementById('chat-messages').classList.add('glow-line');
+                
+                // Immediate generation without delay or chat messages
+                triggerGeneration();
             } catch (e) {
                 addMsg('assistant', `Sync Error: ${e.message}`);
             } finally { 
@@ -492,9 +478,9 @@ SCHEMA 2 (Ready to Render - Generate Payload):
             document.getElementById('canvas-placeholder').classList.add('hidden');
             document.getElementById('canvas-actions').classList.remove('hidden');
             
-            // Auto trigger Grok vision analysis instead of static text
+            // Auto trigger Grok vision analysis with direct generation request
             const input = document.getElementById('chat-input');
-            input.value = "Here is my Visual DNA photo. What do you think of this? Describe what you see and tell me your thoughts.";
+            input.value = "Generate an image based on this Visual DNA photo.";
             await handleChat(true);
         }
         function clearCanvas() {
